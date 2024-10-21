@@ -3,6 +3,8 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
+#include <my_time.h>
+#include <idtLoader.h>
 
 
 extern uint8_t text;
@@ -84,6 +86,9 @@ void * initializeKernelBinary()
 
 int main()
 {   
+	 //load_idt();
+
+	
     ncPrint("[Kernel Main]");
     ncNewline();
     ncPrint("  Sample code module at 0x");
@@ -121,13 +126,18 @@ int main()
     writeString(&videoDriver, getTime(), LIGHT_BLUE, BLACK);
 
 
-    extern char * waitForKeyPress();  // Declaración de la función en ensamblador
+    //extern char * waitForKeyPress();  // Declaración de la función en ensamblador
 
-    char *keyPressed = waitForKeyPress();
-    writeString(&videoDriver, "tecla tocada:", LIGHT_MAGENTA, BLUE);
-    writeString(&videoDriver, keyPressed, LIGHT_MAGENTA, BLUE);
+    //char *keyPressed = waitForKeyPress();
+    //writeString(&videoDriver, "tecla tocada:", LIGHT_MAGENTA, BLUE);
+    //writeString(&videoDriver, keyPressed, LIGHT_MAGENTA, BLUE);
    
-    
+	// while(1) {
+	// 	print_5secs();
+	// 	ncNewline();
+	// }
+   
+
 
     return 0;
 }
