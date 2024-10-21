@@ -2,11 +2,10 @@ GLOBAL cpuVendor
 GLOBAL getSeconds
 GLOBAL getMinutes
 GLOBAL getHour
-
-global waitForKeyPress  ; Hace la función visible para el código en C
+GLOBAL waitForKeyPress  
+GLOBAL rtc_bd_to_binary
 
 section .data
-
 
     ; Mapa de códigos de escaneo a caracteres ASCII
     scancode_map db 0, 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9
@@ -40,13 +39,11 @@ cpuVendor:
     pop rbp
     ret
 
-; Función para convertir un entero a string
-; Parámetros: 
-; rdi - puntero al buffer donde se guardará la cadena
-; rsi - número a convertir
 getSeconds:
     push rbp
     mov rbp, rsp
+
+    call rtc_bd_to_binary
 
     mov al, 0x00
     out 70h, al
@@ -61,6 +58,8 @@ getSeconds:
 getMinutes:
     push rbp
     mov rbp, rsp
+
+    call rtc_bd_to_binary
 
     mov al, 0x02
     out 70h, al
@@ -77,6 +76,8 @@ getHour:
     push rbp
     mov rbp, rsp
 
+    call rtc_bd_to_binary
+
     mov al, 0x04
     out 70h, al
     in al, 71h           ; Leer el valor de horas
@@ -85,6 +86,42 @@ getHour:
     mov rbp, rsp
     pop rbp
     ret
+
+rtc_bd_to_binary:
+	push rbp
+	mov rbp, rsp
+
+	; Obtenemos los datos del registro OBh con el fin de cambiar
+	; como se muestra la hora. Hasta el momento te lo da en BD, pero
+	; la quiero en binario.
+	; Copiamos en al la dir OBh para ingresar al registro
+	; RTC Status register B.
+	mov al, 0Bh 
+	; Copiamos en la direccion 70h el 0Bh para poder acceder al registro
+	; RTC Status register B.
+	out 70h, al  
+	; Hacemos la lectura del registro y la guardamos en al.
+	in al, 71h
+	; Creacion de la mascara para poner en 1 el bit 2 (tercero)
+	; para leer en binario.
+	mov bl, 4h
+	or al, bl
+	; Guardamos el cambio en bl.
+	mov bl, al
+	; Movemos a al 0Bh para poder volver a acceder al registro
+	; RTC Status register B.
+	mov al, 0Bh
+	; Copiamos en la direccion 70h el 0Bh para poder acceder al registro
+	; RTC Status register B. 
+	out 70h, al
+	; Movemos a al el cambio que queremos ingresar.
+	mov al, bl
+	; Para poder escribir en el registro usamos out.
+	out 71h, al
+
+	mov rsp, rbp
+	pop rbp
+	ret
 
 
 

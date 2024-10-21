@@ -5,6 +5,7 @@
 #include <naiveConsole.h>
 #include <my_time.h>
 #include <idtLoader.h>
+#include <videoDriver.h>
 
 
 extern uint8_t text;
@@ -25,7 +26,7 @@ typedef int (*EntryPoint)();
 
 void clearBSS(void * bssAddress, uint64_t bssSize)
 {
-    memset(bssAddress, 0, bssSize);
+    my_memset(bssAddress, 0, bssSize);
 }
 
 void * getStackBase()
@@ -108,13 +109,11 @@ int main()
 
     ncPrint("[Finished]");
 
-    //ncPrintColor("Arquitectura de Computadoras", 0x7A); (ej1)
-
-    //ej2
+	// Inicializar el driver de video	
     VideoDriver videoDriver;
     initVideoDriver(&videoDriver);
 
-    // Usar el driver de video para escribir en pantalla con el color de letra verde y fondo blanco
+    // Usar el driver de video 
     writeString(&videoDriver, "Arquitectura de Computadoras", GREEN, BLACK);
     writeString(&videoDriver, "Hooolaa en azuull", BLUE, BLUE);
     writeString(&videoDriver, "Hooolaa en rojooooo", RED, BLACK);
@@ -125,17 +124,6 @@ int main()
     
     writeString(&videoDriver, getTime(), LIGHT_BLUE, BLACK);
 
-
-    //extern char * waitForKeyPress();  // Declaración de la función en ensamblador
-
-    //char *keyPressed = waitForKeyPress();
-    //writeString(&videoDriver, "tecla tocada:", LIGHT_MAGENTA, BLUE);
-    //writeString(&videoDriver, keyPressed, LIGHT_MAGENTA, BLUE);
-   
-	// while(1) {
-	// 	print_5secs();
-	// 	ncNewline();
-	// }
    
 
 

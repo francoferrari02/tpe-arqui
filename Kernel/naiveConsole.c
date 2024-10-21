@@ -1,4 +1,6 @@
 #include <naiveConsole.h>
+#include <stdint.h>  // Para usar uint32_t
+#include <stdbool.h> // Para usar bool
 
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
@@ -23,88 +25,19 @@ void ncPrint(const char * string)
 		ncPrintChar(string[i]);
 }
 
- 
-
 void ncPrintChar(char character)
 {
 	*currentVideo = character; 
 	currentVideo += 2;
 }
 
-void ncNewline()
-{
-	do
-	{
+void ncNewline(){
+	do{
 		ncPrintChar(' ');
 	}
 	while((uint64_t)(currentVideo - video) % (width * 2) != 0);
 }
 
-
-//ej2
-uint8_t combineColors(Color textColor, Color bgColor) {
-    return (bgColor << 4) | (textColor & 0x0F);
-}
-/*y * driver->width determina cuántas posiciones de la pantalla hay antes de la fila y.
-+ x añade el número de columnas a la posición actual.
-* 2 se multiplica por 2 porque cada posición de la memoria de video ocupa 2 bytes: 
-uno para el carácter y otro para el atributo (color).*/
-void writeChar(VideoDriver *driver, char c, Color textColor, Color bgColor, uint32_t x, uint32_t y) {
-    if (x < driver->width && y < driver->height) {
-        uint32_t index = (y * driver->width + x) * 2;
-        driver->video[index] = c;       // Carácter
-
-        // Combina el color de texto y el color de fondo
-        driver->video[index + 1] = combineColors(textColor, bgColor);
-    }
-}
-
-void writeString(VideoDriver *driver, const char *str, Color textColor, Color bgColor) {
-    while (*str) {
-        writeChar(driver, *str, textColor, bgColor, driver->cursorX, driver->cursorY);
-
-        // Mueve el cursor a la derecha
-        driver->cursorX++;
-
-        // Si alcanzamos el final de la línea, avanzamos a la siguiente fila
-        if (driver->cursorX >= driver->width) {
-            driver->cursorX = 0; // Reinicia X a la primera columna
-            driver->cursorY++;    // Avanza a la siguiente fila
-        }
-
-        // Si alcanzamos el final de la pantalla, podemos hacer scroll o reiniciar
-        if (driver->cursorY >= driver->height) {
-            driver->cursorY = driver->height - 1; // Mantiene el cursor en la última fila
-            // Aquí puedes implementar lógica de scroll si lo deseas
-        }
-
-        str++; // Avanza al siguiente carácter de la cadena
-    }
-	driver->cursorY++;
-	driver->cursorX=0;
-}
-
-
-void initVideoDriver(VideoDriver *driver) {
-    driver->video = VIDEO_MEMORY;
-    driver->width = WIDTH;
-    driver->height = HEIGHT;
-	driver->cursorX=0;
-	driver->cursorY=0;
-
-    // Limpia la pantalla
-    clearScreen(driver);
-}
-
-void clearScreen(VideoDriver *driver) {
-    for (int i = 0; i < driver->width * driver->height; i++) {
-        driver->video[i * 2] = ' ';       // Espacio en blanco
-        driver->video[i * 2 + 1] = 0x07;  // Color blanco
-    }
-}
-
-#include <stdint.h>  // Para usar uint32_t
-#include <stdbool.h> // Para usar bool
 
 // Función para convertir un entero a string
 void intToStr(int value, char *buffer) {
