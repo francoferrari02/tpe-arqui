@@ -5,15 +5,6 @@ GLOBAL getHour
 GLOBAL waitForKeyPress  
 GLOBAL rtc_bd_to_binary
 
-section .data
-
-    ; Mapa de códigos de escaneo a caracteres ASCII
-    scancode_map db 0, 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 8, 9
-                db 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 13, 0, 'a', 's'
-                db 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\', 'z', 'x', 'c', 'v'
-                db 'b', 'n', 'm', ',', '.', '/', 0, '*', 0, ' ', 0
-
-
 section .text
     
 cpuVendor:
@@ -87,69 +78,27 @@ getHour:
     pop rbp
     ret
 
+; Función para convertir el formato BCD a binario
 rtc_bd_to_binary:
-	push rbp
-	mov rbp, rsp
+    push rbp
+    mov rbp, rsp
 
-	; Obtenemos los datos del registro OBh con el fin de cambiar
-	; como se muestra la hora. Hasta el momento te lo da en BD, pero
-	; la quiero en binario.
-	; Copiamos en al la dir OBh para ingresar al registro
-	; RTC Status register B.
-	mov al, 0Bh 
-	; Copiamos en la direccion 70h el 0Bh para poder acceder al registro
-	; RTC Status register B.
-	out 70h, al  
-	; Hacemos la lectura del registro y la guardamos en al.
-	in al, 71h
-	; Creacion de la mascara para poner en 1 el bit 2 (tercero)
-	; para leer en binario.
-	mov bl, 4h
-	or al, bl
-	; Guardamos el cambio en bl.
-	mov bl, al
-	; Movemos a al 0Bh para poder volver a acceder al registro
-	; RTC Status register B.
-	mov al, 0Bh
-	; Copiamos en la direccion 70h el 0Bh para poder acceder al registro
-	; RTC Status register B. 
-	out 70h, al
-	; Movemos a al el cambio que queremos ingresar.
-	mov al, bl
-	; Para poder escribir en el registro usamos out.
-	out 71h, al
+    mov al, 0Bh           ; Seleccionar el registro de estado B
+    out 70h, al
+    in al, 71h            ; Leer el valor del registro de estado B
 
-	mov rsp, rbp
-	pop rbp
-	ret
+    or al, 00000010b      ; Activar el bit 2 (modo binario)
+    
+    mov bl, al            ; Guardar el valor de al en bl
+    mov al, 0Bh           ; Seleccionar nuevamente el registro de estado B
+    out 70h, al
+    mov al, bl            ; Restaurar el valor modificado de al
+    out 71h, al           ; Escribir el valor de vuelta al registro
 
-
-
-
-
-
-waitForKeyPress:
-    call getKeyPress
-
-    ; Convertir el scan code al carácter ASCII usando el mapa
-    movzx rax, al          ; Zero extend el scan code de 8 bits a 64 bits
-    cmp al, 0x58           ; Chequea si es un código de scan válido (máx. 0x58 en esta tabla)
-    ja invalid_scancode    ; Si es mayor, no es válido
-    mov al, [scancode_map + rax]  ; Cargar el carácter correspondiente
-
-invalid_scancode:
-    mov [keyPressed], al   ; Almacenar el carácter o código de error en keyPressed
-    lea rax, [keyPressed]  ; Cargar la dirección de keyPressed en rax
+    mov rsp, rbp 
+    pop rbp
     ret
 
-getKeyPress:
-    .wait:
-        in al, 0x64        ; Leer el estado del puerto 0x64
-        test al, 0x01      ; Verificar si hay datos disponibles
-        jz .wait           ; Si no, sigue esperando
-
-    in al, 0x60            ; Leer el código de escaneo del puerto 0x60
-    ret
 
 section .bss
 

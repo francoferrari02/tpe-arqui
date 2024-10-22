@@ -18,3 +18,12 @@ typedef struct{
     uint32_t cursorX; // Posición en X
     uint32_t cursorY; // Posición en Y
 }VideoDriver;
+
+void initVideoDriver(VideoDriver *driver);
+void clearScreen(VideoDriver *driver);
+uint8_t combineColors(Color textColor, Color bgColor);
+void writeChar(VideoDriver *driver, char c, Color textColor, Color bgColor, uint32_t x, uint32_t y);
+void writeString(VideoDriver *driver, const char *str, Color textColor, Color bgColor);
+void scroll();
+
+

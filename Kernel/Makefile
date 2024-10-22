@@ -1,7 +1,7 @@
 include Makefile.inc
 
 KERNEL = kernel.bin
-SOURCES = $(wildcard *.c) $(wildcard IDT/*.c)
+SOURCES = $(wildcard *.c) $(wildcard IDT/*.c) $(wildcard driver/*.c)
 SOURCES_ASM = $(wildcard asm/*.asm)
 OBJECTS = $(SOURCES:.c=.o)
 OBJECTS_ASM = $(SOURCES_ASM:.asm=.o)
@@ -16,7 +16,7 @@ $(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
 
 # Compilación de archivos .c a .o
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+	$(GCC) $(GCCFLAGS) -I./include -I./driver -I./IDT -c $< -o $@
 
 # Compilación de archivos .asm a .o
 %.o: %.asm

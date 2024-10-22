@@ -85,6 +85,7 @@ SECTION .text
 %endmacro
 
 
+
 _hlt:
 	sti
 	hlt
@@ -99,6 +100,7 @@ _sti:
 	sti
 	ret
 
+
 picMasterMask:
 	push rbp
     mov rbp, rsp
@@ -106,6 +108,7 @@ picMasterMask:
     out	21h,al
     pop rbp
     retn
+
 
 picSlaveMask:
 	push    rbp

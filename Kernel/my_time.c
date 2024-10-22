@@ -7,7 +7,7 @@ int ellapsed=0;
 void timer_handler() {
 	ticks++;
     ellapsed += 55;
-
+    print_5secs();
 }
 
 int ticks_elapsed() {
@@ -42,5 +42,6 @@ void timer_wait(int delta) {
 	int initialTicks = ticks;
 	while(ticks - initialTicks < delta) {
 		_hlt();
+        ncPrint("Waiting\n");
 	}
 }

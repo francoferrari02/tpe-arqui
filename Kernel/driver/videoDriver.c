@@ -2,6 +2,7 @@
 #include <videoDriver.h>
 
 
+
 // Inicializa el driver de video
 void initVideoDriver(VideoDriver *driver) {
     driver->video = VIDEO_MEMORY;
@@ -60,7 +61,7 @@ void writeString(VideoDriver *driver, const char *str, Color textColor, Color bg
 }
 
 // Hace scroll en la pantalla cuando se llegó al final
-static void scroll(){
+void scroll(){
     for (int i = 0; i < WIDTH * (HEIGHT - 1) * 2; i++) {
         VIDEO_MEMORY[i] = VIDEO_MEMORY[i + WIDTH * 2];
     }

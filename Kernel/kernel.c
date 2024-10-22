@@ -5,7 +5,8 @@
 #include <naiveConsole.h>
 #include <my_time.h>
 #include <idtLoader.h>
-#include <videoDriver.h>
+#include "videoDriver.h"
+#include "keyboardDriver.h"
 
 
 extern uint8_t text;
@@ -14,6 +15,8 @@ extern uint8_t data;
 extern uint8_t bss;
 extern uint8_t endOfKernelBinary;
 extern uint8_t endOfKernel;
+
+extern void hlt();
 
 static const uint64_t PageSize = 0x1000;
 
@@ -86,36 +89,18 @@ void * initializeKernelBinary()
 }
 
 int main()
-{   
-	 //load_idt();
-
+{   //load_idt();
 	
-    ncPrint("[Kernel Main]");
-    ncNewline();
-    ncPrint("  Sample code module at 0x");
-    ncPrintHex((uint64_t)sampleCodeModuleAddress);
-    ncNewline();
-    ncPrint("  Calling the sample code module returned: ");
-    ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-    ncNewline();
-    ncNewline();
-
-    ncPrint("  Sample data module at 0x");
-    ncPrintHex((uint64_t)sampleDataModuleAddress);
-    ncNewline();
-    ncPrint("  Sample data module contents: ");
-    ncPrint((char*)sampleDataModuleAddress);
-    ncNewline();
-
-    ncPrint("[Finished]");
 
 	// Inicializar el driver de video	
     VideoDriver videoDriver;
     initVideoDriver(&videoDriver);
 
-    // Usar el driver de video 
+	clearScreen(&videoDriver);
+    
+	// Usar el driver de video 
     writeString(&videoDriver, "Arquitectura de Computadoras", GREEN, BLACK);
-    writeString(&videoDriver, "Hooolaa en azuull", BLUE, BLUE);
+    writeString(&videoDriver, "Hooolaa en azuull", BLUE, LIGHT_GREEN);
     writeString(&videoDriver, "Hooolaa en rojooooo", RED, BLACK);
     writeString(&videoDriver, "Hooolaa en marroooon", LIGHT_BROWN, BLACK);
     writeString(&videoDriver, "Hooolaa en griiiiis", LIGHT_GREY, BLACK);
@@ -123,6 +108,7 @@ int main()
     writeString(&videoDriver, "HOLA HOLA HOLA HOLA HOLA", LIGHT_MAGENTA, BLUE);
     
     writeString(&videoDriver, getTime(), LIGHT_BLUE, BLACK);
+	
 
    
 
