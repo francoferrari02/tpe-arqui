@@ -3,8 +3,6 @@
 #include <defs.h>
 #include <interrupts.h>
 
-
-
 #pragma pack(push)		/* Push de la alineación actual */
 #pragma pack (1) 		/* Alinear las siguiente estructuras a 1 byte */
 
@@ -18,10 +16,24 @@ typedef struct {
 
 #pragma pack(pop)		/* Reestablece la alinceación actual */
 
-
+static void setup_IDT_entry (int index, uint64_t offset);
 
 DESCR_INT * idt = (DESCR_INT *) 0;	// IDT de 255 entradas
 
+static void setup_IDT_entry (int index, uint64_t offset);
+
+void load_idt() {
+
+  setup_IDT_entry (0x20, (uint64_t)&_irq00Handler);
+  setup_IDT_entry (0x00, (uint64_t)&_exception0Handler);
+
+
+	//Solo interrupcion timer tick habilitadas
+	picMasterMask(0xFE); 
+	picSlaveMask(0xFF);
+        
+	_sti();
+}
 
 static void setup_IDT_entry (int index, uint64_t offset) {
   idt[index].selector = 0x08;
@@ -32,25 +44,3 @@ static void setup_IDT_entry (int index, uint64_t offset) {
   idt[index].cero = 0;
   idt[index].other_cero = (uint64_t) 0;
 }
-
-void load_idt() {
-  _cli();
-
-  //IDT
-  //setup_IDT_entry(0x21, (uint64_t)&_irq01Handler);
-  setup_IDT_entry (0x20, (uint64_t)&_irq00Handler);
-  //setup_IDT_entry (0x00, (uint64_t)&_exception0Handler);
-
-  //Syscall
- // setup_IDT_entry(0x80, (uint64_t)&interrupt_systemCall);
-
-
-	//Solo interrupcion timer tick habilitadas
-	picMasterMask(0xFC); 
-	picSlaveMask(0xFF);
-
-        
-	_sti();
-}
-
-

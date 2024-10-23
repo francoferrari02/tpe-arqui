@@ -19,10 +19,4 @@ clean:
 	cd Kernel; make clean
 	cd Userland; make clean
 
-ej1.bin: ej1.asm
-	nasm -f bin -o ej1.bin ej1.asm
-
-
-
-
 .PHONY: bootloader image collections kernel userland all clean

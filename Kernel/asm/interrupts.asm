@@ -38,8 +38,6 @@ SECTION .text
 	push r15
 %endmacro
 
-
-
 %macro popState 0
 	pop r15
 	pop r14
@@ -85,7 +83,6 @@ SECTION .text
 %endmacro
 
 
-
 _hlt:
 	sti
 	hlt
@@ -100,7 +97,6 @@ _sti:
 	sti
 	ret
 
-
 picMasterMask:
 	push rbp
     mov rbp, rsp
@@ -108,7 +104,6 @@ picMasterMask:
     out	21h,al
     pop rbp
     retn
-
 
 picSlaveMask:
 	push    rbp

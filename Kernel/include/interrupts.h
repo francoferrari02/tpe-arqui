@@ -8,10 +8,10 @@
 #ifndef INTERRUPS_H_
 #define INTERRUPS_H_
 
-#include "idtLoader.h"
+#include <idtLoader.h>
 
-void _irq00Handler(void);  //timer tick
-void _irq01Handler(void); //teclado
+void _irq00Handler(void);
+void _irq01Handler(void);
 void _irq02Handler(void);
 void _irq03Handler(void);
 void _irq04Handler(void);
@@ -24,8 +24,6 @@ void _cli(void);
 void _sti(void);
 
 void _hlt(void);
-
-void _lidt(void * idt);
 
 void picMasterMask(uint8_t mask);
 

@@ -1,5 +1,4 @@
 global loader
-
 extern main
 extern initializeKernelBinary
 
