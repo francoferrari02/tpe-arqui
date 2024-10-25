@@ -54,7 +54,7 @@ static char * keyMap[] = {keyMapL, keyMapU};
 
 void keyboard_handler(uint8_t keyPressed) {
     notChar = keyPressed;
-    dv_prints("Tecla presionada", WHITE, BLACK);
+    
     //shift pressed
     if (notChar == 0x2A || notChar == 0x36){
         shift = 1;
@@ -67,6 +67,7 @@ void keyboard_handler(uint8_t keyPressed) {
     if (notChar == 0x3A) {
         capsLock = (capsLock+1)%2;
     }
+
 
 
 }

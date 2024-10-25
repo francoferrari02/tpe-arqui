@@ -85,9 +85,11 @@ void * initializeKernelBinary()
 int main(){	
 	load_idt();
 
+	setCeroChar();
 
 	
     ((EntryPoint)sampleCodeModuleAddress)();
+
 
     while(1) _hlt();
 	return 0;

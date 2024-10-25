@@ -1,4 +1,6 @@
 #include <time.h>
+#include "include/naiveConsole.h"
+#include "include/videoDriver.h"
 
 static unsigned long ticks = 0;
 

@@ -1,5 +1,7 @@
 GLOBAL cpuVendor
 
+GLOBAL sys_read
+
 section .text
 	
 cpuVendor:
@@ -25,3 +27,8 @@ cpuVendor:
 	mov rsp, rbp
 	pop rbp
 	ret
+
+sys_read:
+    mov rax, 0x00
+    int 80h
+    ret

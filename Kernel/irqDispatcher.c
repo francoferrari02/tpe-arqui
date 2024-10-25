@@ -3,25 +3,27 @@
 #include <naiveConsole.h>
 #include <videoDriver.h>
 
-static void int_20();
 
-void irqDispatcher(uint64_t irq) {
-	switch (irq) {
-		case 0:
-			int_20();
-			break;
-	}
-	return;
-}
+static void int_20();
+static void int_21();
+
+typedef void (*void_function)(void);
+
+static void_function interruptions[255]={&int_20, &int_21};
 
 void int_20() {
-	dv_prints("Tick",RED ,BLACK );	
-	dv_prints("Tick",ORANGE ,BLACK );	
-	dv_prints("Tick",YELLOW ,BLACK );	
-	dv_prints("Tick",GREEN ,BLACK );	
-	dv_prints("Tick",BLUE ,BLACK );	
-	dv_prints("Tick",PURPLE ,BLACK );	
 	
-	ncNewline();
-	timer_handler();
+    timer_handler();
+}
+
+void int_21() {
+	dv_prints("Keyboard\n", WHITE, BLACK);
+    keyboard_handler();  // funcion ejer anterior
+}
+
+void irqDispatcher(uint64_t irq) {
+    void_function interruption = interruptions[irq];
+    if (interruption != 0)
+        interruption();
+    return;
 }

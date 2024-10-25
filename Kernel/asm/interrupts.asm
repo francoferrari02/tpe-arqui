@@ -19,6 +19,7 @@ GLOBAL excRegData
 GLOBAL registerInfo
 GLOBAL hasregisterInfo
 
+EXTERN timer_handler
 EXTERN keyboard_handler
 
 EXTERN dv_newLine
@@ -160,11 +161,18 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	pushState
+
+	call timer_handler
+
+	endOfHardwareInterrupt
+	popState
+	iretq
+
+	
 
 ;Keyboard
 _irq01Handler:
-	interrupt_keyboardHandler:
 	pushState
 
     xor rax, rax
@@ -220,7 +228,6 @@ _irq01Handler:
     endOfHardwareInterrupt
     popState
     iretq
-
 ;Cascade pic never called
 _irq02Handler:
 	irqHandlerMaster 2
