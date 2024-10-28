@@ -1,4 +1,3 @@
-
 GLOBAL _cli
 GLOBAL _sti
 GLOBAL picMasterMask
@@ -6,26 +5,21 @@ GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
 
-GLOBAL _irq00Handler
-GLOBAL _irq01Handler
-GLOBAL _irq02Handler
-GLOBAL _irq03Handler
-GLOBAL _irq04Handler
-GLOBAL _irq05Handler
+GLOBAL interrupt_keyboard
+GLOBAL interrupt_timerTick
+GLOBAL exception_divideByZero
+GLOBAL exception_invalidOpCode
+GLOBAL interrupt_syscall
 
-GLOBAL _exception0Handler
-
-GLOBAL excRegData
-GLOBAL registerInfo
-GLOBAL hasregisterInfo
+GLOBAL regdata_exc
+GLOBAL inforeg
+GLOBAL hasInforeg
 
 EXTERN timer_handler
 EXTERN keyboard_handler
-
-EXTERN dv_newLine
-
-EXTERN irqDispatcher
-EXTERN exceptionDispatcher
+EXTERN syscall_handler
+EXTERN exception_handler
+EXTERN dv_newline
 
 SECTION .text
 
@@ -65,37 +59,39 @@ SECTION .text
 	pop rax
 %endmacro
 
-%macro endOfHardwareInterrupt 0
+%macro endOfHardwareInterrupt 0 ; para el keyboard y el timer tick
+    ; signal pic EOI (End of Interrupt)
     mov al, 20h
     out 20h, al
 %endmacro
 
 %macro saveRegistersException 0
-	mov [excRegData+0], rax
-	mov [excRegData+8], rbx
-	mov [excRegData+16], rcx
-	mov [excRegData+24], rdx
-	mov [excRegData+32], rsi
-	mov [excRegData+40], rdi
-	mov [excRegData+48], rbp
-	mov [excRegData+64], r8
-	mov [excRegData+72], r9
-	mov [excRegData+80], r10
-	mov [excRegData+88], r11
-	mov [excRegData+96], r12
-	mov [excRegData+104], r13
-	mov [excRegData+112], r14
-	mov [excRegData+120], r15
+	mov [regdata_exc+0], 	rax ;0
+	mov [regdata_exc+8], 	rbx ;1
+	mov [regdata_exc+16], 	rcx ;2
+	mov [regdata_exc+24], 	rdx ;3
+	mov [regdata_exc+32], 	rsi ;4
+	mov [regdata_exc+40], 	rdi ;5
+	mov [regdata_exc+48], 	rbp ;6
+	mov [regdata_exc+64], 	r8  ;8
+	mov [regdata_exc+72], 	r9  ;9
+	mov [regdata_exc+80], 	r10 ;10
+	mov [regdata_exc+88], 	r11	;11
+	mov [regdata_exc+96], 	r12 ;12
+	mov [regdata_exc+104], 	r13 ;13
+	mov [regdata_exc+112], 	r14 ;14
+	mov [regdata_exc+120], 	r15 ;15
 
-	mov rax, rsp
+
+	mov rax, rsp ; We get the value of RSP when the exception ocurred by adding the amount of pushed bytes to the current value of RSP.
 	add rax, 40
-	mov [excRegData+56], rax
+	mov [regdata_exc+56], rax ;7
 
-	mov rax, [rsp]
-	mov [excRegData+128], rax
+	mov rax, [rsp] ; We get the value of RIP when the exception ocurred by taking the interruption's return address.
+	mov [regdata_exc+128], rax ;16
 
-	mov rax, [rsp+8]
-	mov [excRegData+136], rax
+	mov rax, [rsp+8] ; We get the value of RFLAGS the same way (it is pushed when an interrupt occurs).
+	mov [regdata_exc+136], rax ;17
 %endmacro
 
 _hlt:
@@ -128,39 +124,72 @@ picSlaveMask:
     pop     rbp
     retn
 
-%macro irqHandlerMaster 1
+
+
+
+
+interrupt_keyboard:
 	pushState
 
-	mov rdi, %1 ; pasaje de parametro
-	call irqDispatcher
+	xor rax, rax
+	in al, 60h 		; 60 es el puerto del teclado AL : 8 bits
+	mov rdi, rax 	; recepcion del primer parametro
 
-	; signal pic EOI (End of Interrupt)
-	mov al, 20h
-	out 20h, al
+	cmp al, 0x2A 	;left shift pressed
+	jne .continue1
+	mov byte [left_shift], 1
 
-	popState
+.continue1:
+	cmp al, 0xAA 	;left shift realesed
+	jne .continue2
+	mov byte [left_shift], 0
+
+	;si estan apretados SHIFT+S se copian los registros en el vector regdataDump
+	;mover RSP a donde estaba antes de ser llamada la excepcion
+.continue2:
+	cmp byte [left_shift], 1 	; 's' pressed
+	jne .continue3
+	cmp al, 0x1F
+	jne .continue3
+
+	mov [inforeg+2*8], rbx
+	mov [inforeg+3*8], rcx
+	mov [inforeg+4*8], rdx
+	mov [inforeg+5*8], rsi
+	mov [inforeg+6*8], rdi
+	mov [inforeg+7*8], rbp
+	;mov [inforeg+8*8], rsp
+	mov [inforeg+9*8], r8
+	mov [inforeg+10*8], r9
+	mov [inforeg+11*8], r10
+	mov [inforeg+12*8], r11
+	mov [inforeg+13*8], r12
+	mov [inforeg+14*8], r13
+	mov [inforeg+15*8], r14
+	mov [inforeg+16*8], r15
+
+	mov rax, rsp
+	add rax, 160 ;120 del popstate 
+	mov [inforeg+8*8], rax ;RSP
+
+	mov rax, [rsp+15*8]
+	mov [inforeg], rax ;RIP
+	
+	mov rax, [rsp+14*8]
+	mov [inforeg+1*8], rax ;RAX
+
+	mov byte [hasInforeg], 1
+
+.continue3:
+    call keyboard_handler
+
+    endOfHardwareInterrupt
+    popState
 	iretq
-%endmacro
 
 
 
-%macro exceptionHandler 1
-	pushState
-
-	mov rdi, %1 ; pasaje de parametro
-	call exceptionDispatcher
-
-	popState
-	iretq
-%endmacro
-
-
-
-
-
-
-;8254 Timer (Timer Tick)
-_irq00Handler:
+interrupt_timerTick:
 	pushState
 
 	call timer_handler
@@ -169,85 +198,34 @@ _irq00Handler:
 	popState
 	iretq
 
-	
 
-;Keyboard
-_irq01Handler:
-	pushState
+exception_divideByZero:
+	saveRegistersException
 
-    xor rax, rax
-    in al, 60h
-    mov rdi, rax
-
-    cmp al, 0x2A  ; Check if left shift is pressed
-    jne .check_left_shift_release
-    mov byte [shiftKey], 1
-
-.check_left_shift_release:
-    cmp al, 0xAA  ; Check if left shift is released
-    jne .check_shift_s_pressed
-    mov byte [shiftKey], 0
-
-.check_shift_s_pressed:
-    cmp byte [shiftKey], 1
-    jne .handle_keyboard_interrupt
-    cmp al, 0x1F  ; Check if 's' key is pressed
-    jne .handle_keyboard_interrupt
-
-    ; Save register values
-    mov [registerInfo+2*8], rbx
-    mov [registerInfo+3*8], rcx
-    mov [registerInfo+4*8], rdx
-    mov [registerInfo+5*8], rsi
-    mov [registerInfo+6*8], rdi
-    mov [registerInfo+7*8], rbp
-    mov [registerInfo+9*8], r8
-    mov [registerInfo+10*8], r9
-    mov [registerInfo+11*8], r10
-    mov [registerInfo+12*8], r11
-    mov [registerInfo+13*8], r12
-    mov [registerInfo+14*8], r13
-    mov [registerInfo+15*8], r14
-    mov [registerInfo+16*8], r15
-
-    mov rax, rsp
-    add rax, 160
-    mov [registerInfo+8*8], rax
-
-    mov rax, [rsp+15*8]
-    mov [registerInfo], rax
-    
-    mov rax, [rsp+14*8]
-    mov [registerInfo+1*8], rax
-
-    mov byte [hasregisterInfo], 1
-
-.handle_keyboard_interrupt:
-    call keyboard_handler
-
-    endOfHardwareInterrupt
-    popState
-    iretq
-;Cascade pic never called
-_irq02Handler:
-	irqHandlerMaster 2
-
-;Serial Port 2 and 4
-_irq03Handler:
-	irqHandlerMaster 3
-
-;Serial Port 1 and 3
-_irq04Handler:
-	irqHandlerMaster 4
-
-;USB
-_irq05Handler:
-	irqHandlerMaster 5
+	mov rdi, 00h
+	mov rsi, regdata_exc
+	call exception_handler
 
 
-;Zero Division Exception
-_exception0Handler:
-	exceptionHandler 0
+;ESTO HAY QUE MODIFICARLO
+exception_invalidOpCode:
+	saveRegistersException
+
+	mov rdi, 06h
+	mov rsi, regdata_exc
+	call exception_handler
+
+
+; syscalls params:	RDI	RSI	RDX	R10	R8	R9
+; C 	params   :	RDI RSI RDX RCX R8  R9
+interrupt_syscall:
+	mov rcx, r10
+	mov r9, rax
+	call syscall_handler
+	iretq
+
+
+
 
 haltcpu:
 	cli
@@ -258,7 +236,7 @@ haltcpu:
 
 SECTION .bss
 	aux resq 1
-	excRegData		resq	18
-	registerInfo	resq	17
-	hasregisterInfo 		resb 1
-	shiftKey  	resb 1
+	regdata_exc		resq	18	; reserva 18 bytes para guardar los registros para excepciones
+	inforeg	resq	17	; reserve space for 17 qwords (one for each register we want to show on inforeg).
+	hasInforeg 		resb 	1 	; reserve 1 byte for a boolean on whether a regdump has already occurred.
+	left_shift  	resb 	1   ; shift presionado

@@ -13,18 +13,6 @@ typedef struct {
 extern Color RED;
 extern Color WHITE;
 extern Color BLACK;
-extern Color GREEN;
-extern Color BLUE;
-extern Color YELLOW;
-extern Color CYAN;
-extern Color MAGENTA;
-extern Color ORANGE; 
-extern Color PURPLE;
-extern Color BROWN; 
-extern Color GRAY; 
-extern Color LIGHT_GRAY; 
-extern Color DARK_GRAY; 
-extern Color PINK; 
 
 
 //////////////

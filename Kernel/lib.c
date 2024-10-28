@@ -49,8 +49,4 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 	return destination;
 }
 
-char getChar(){
-	char c;
-	sys_read(0, &c);
-	return c;
-}
+

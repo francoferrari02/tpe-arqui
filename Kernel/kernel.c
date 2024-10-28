@@ -85,7 +85,7 @@ void * initializeKernelBinary()
 int main(){	
 	load_idt();
 
-	setCeroChar();
+	clearScanCode();
 
 	
     ((EntryPoint)sampleCodeModuleAddress)();

@@ -15,3 +15,14 @@ int ticks_elapsed() {
 int seconds_elapsed() {
 	return ticks / 18;
 }
+
+int ms_elapsed() {
+    return ticks*5000/91;
+}
+
+void timer_wait(int delta) { 
+	int initialTicks = ticks;
+	while(ticks - initialTicks < delta) {
+		_hlt();
+	}
+}
