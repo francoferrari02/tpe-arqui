@@ -3,18 +3,19 @@
 #include "lib.h"
 #include <time.h>
 #include "sound.h"
+#include "../Userland/SampleCodeModule/include/colores.h"
 
 #define STDIN  0
 #define STDOUT 1
 #define STDERR 2
 
-extern uint8_t hasInforeg;
-extern const uint64_t inforeg[17];
+extern uint8_t has_register_info;
+extern const uint64_t register_info[17];
 extern int _hlt();
 
-extern Color RED;
-extern Color WHITE;
-extern Color BLACK;
+static Color RED = {255,0,0};
+static Color WHITE = {255,255,255};
+static Color BLACK = {0,0,0};
 
 int size = 0;
 
@@ -32,12 +33,12 @@ static uint64_t sys_read(uint64_t fd, char * buff){
 }
 
 
-static uint64_t sys_write(uint64_t fd, char buffer) {
+static uint64_t sys_write(uint64_t fd, char buffer, Color fnt){
     if (fd != 1){
         return -1;
     }
 
-    dv_print(buffer,WHITE,BLACK);
+    dv_print(buffer,fnt);
     return 1;
 }
 
@@ -47,15 +48,15 @@ static uint64_t sys_clear(){
 }
 
 static uint64_t sys_getHours(){
-    return getHours();
+    return hoursGetter();
 }
 
 static uint64_t sys_getMinutes(){
-    return getMinutes();
+    return minutesGetter();
 }
 
 static uint64_t sys_getSeconds(){
-    return getSeconds();
+    return secondsGetter();
 } 
 
 static uint64_t sys_getScrHeight(){
@@ -78,12 +79,12 @@ static void sys_wait (int ms){
 }
 
 static uint64_t sys_inforeg (uint64_t registers[17]){
-    if(hasInforeg){
+    if(has_register_info){
         for(uint8_t i=0; i<17; i++){
-            registers[i] = inforeg[i];
+            registers[i] = register_info[i];
         }
     }
-    return hasInforeg;
+    return has_register_info;
 }
 
 static uint64_t sys_printmem ( uint64_t * address ){
@@ -92,10 +93,10 @@ static uint64_t sys_printmem ( uint64_t * address ){
     }
 
     uint8_t * aux = (uint8_t *) address;
-        dv_prints("\n",WHITE,BLACK);
+        dv_prints("\n",WHITE);
     for(int i=0; i < 32 ; i++){
         dv_printHex((uint64_t) aux, WHITE, BLACK);
-        dv_prints(" = ", WHITE, BLACK);
+        dv_prints(" = ", WHITE);
         dv_printHex(*aux, WHITE, BLACK);
         dv_newline();
         aux++;
@@ -117,27 +118,26 @@ static uint64_t sys_pixelMinus(){
     return 1;
 }
 
-static uint64_t sys_playSound(uint32_t frequnce){
-    startSound(frequnce);
+static uint64_t sys_playSound(uint32_t frequence, uint64_t duration)
+{
+    noise(frequence, duration);
     return 1;
 }
 
-static uint64_t sys_mute(){
-    stopSound();
+static uint64_t sys_stopSound()
+{
+    stopSpeaker();
     return 1;
 }
 
 
 
-// static uint64_t (*syscall_handlers[])(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8) = {
-//     sys_read, sys_write, sys_clear, sys_getHours, sys_getMinutes, sys_getSeconds,sys_getScrHeight, sys_getScrWidth, sys_fillRect,
-//     sys_wait, sys_inforeg,sys_printmem, sys_pixelPlus, sys_pixelMinus
-// };
+
 
 //los void los pongo sino me tira warning
 static uint64_t (*syscall_handlers[])(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = {
     (void*)sys_read, (void*)sys_write, (void*)sys_clear, (void*)sys_getHours, (void*)sys_getMinutes, (void*)sys_getSeconds, (void*)sys_getScrHeight, (void*)sys_getScrWidth, (void*)sys_fillRect,
-    (void*)sys_wait, (void*)sys_inforeg, (void*)sys_printmem, (void*)sys_pixelPlus, (void*)sys_pixelMinus, (void*)sys_playSound, (void*)sys_mute
+    (void*)sys_wait, (void*)sys_inforeg, (void*)sys_printmem, (void*)sys_pixelPlus, (void*)sys_pixelMinus, (void*)sys_playSound, (void*)sys_stopSound
 };
 
 

@@ -3,16 +3,9 @@
 
 
 #include <stdint.h>
+#include "../../Userland/SampleCodeModule/include/colores.h"
 
-typedef struct {
-    uint8_t b;
-    uint8_t g;
-    uint8_t r;
-} Color;
 
-extern Color RED;
-extern Color WHITE;
-extern Color BLACK;
 
 
 //////////////
@@ -31,10 +24,10 @@ uint16_t getRealCharHeight();
 
 
 /* Writes a string in screen*/
-void dv_prints(const char *str, Color fnt, Color bgd);
+void dv_prints(const char *str, Color fnt);
 
 /* Writes a char in screen, given a font Color and Background Color*/
-void dv_print(char c, Color fnt, Color bgd);
+void dv_print(char c, Color fnt);
 
 /* Jumps to the next line */
 void dv_newline();

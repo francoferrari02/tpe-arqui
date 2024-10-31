@@ -1,6 +1,8 @@
 #include <sys_calls.h>
 #include <stdio.h>
 #include <exceptionTest.h>
+#include <colores.h>
+#include "include/userLib.h"
 
 #define STDIN 0
 #define STDOUT 1
@@ -11,17 +13,20 @@ static char buffer[64] = { '0' };
 int scr_height;
 int scr_width;
 
+static Color RED = {255,0,0};
+static Color WHITE = {255,255,255};
+static Color BLACK = {0,0,0};
 
 
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
-void printc (char c){
-	sys_write(STDOUT, c);
+void printc (char c, Color fnt){
+	sys_write(STDOUT, c, fnt);
 }
 
-void prints (const char * str, int lenght){
+void prints (const char * str, int lenght, Color fnt){
 	for (int i = 0 ; i < lenght && str[i] != 0 ; i++){
-		printc(str[i]);
+		printc(str[i], fnt);
 	}
 }
 
@@ -32,7 +37,7 @@ char getChar(){
 }
 
 
-int isChar (char c){
+int isChar(char c){
 	if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')){
 		return 1;
 	}
@@ -94,7 +99,7 @@ uint64_t charToInt(char* str){
 void printBase(uint64_t value, uint32_t base){
     uintToBase(value, buffer, base);
     for (int i = 0 ; buffer[i] != '\0' ; i++ ){
-        printc(buffer[i]);
+        printc(buffer[i], WHITE);
     }
 }
 
@@ -194,22 +199,34 @@ void inforeg(){
 	uint64_t registers[17];
 	int i = sys_inforeg(registers);
 
-	printc('\n');	
+	printc('\n', WHITE);	
 	if (i == 1){
 		for (int i = 0; i < 17; i++) {
-        	prints(register_names[i],100);
-        	prints(": ",100);
+        	prints(register_names[i],100, WHITE);
+        	prints(": ",100, WHITE);
         	uint64ToHex(registers[i], hexbuf+2);
-        	prints(hexbuf,100);
+        	prints(hexbuf,100, WHITE);
         	if (i % 4 == 3)
-            printc('\n');
+            printc('\n', WHITE);
         else
-            prints("   ",100);
+            prints("   ",100, WHITE);
         }
 
 
     } else {
-		prints("\nTodavia no hay un snapshot de los registros, presione SHIFT + S para sacar una foto\n",100);
+		prints("\nTodavia no hay un snapshot de los registros, presione SHIFT + S para sacar una foto.\n",100, WHITE);
+	}
+}
+
+void playSound(uint32_t freq, uint32_t length){
+	sys_playSound(freq, length);
+}
+
+void playMusic(NoteType *melody, int length)
+{
+	for (int i = 0; i < length; i++)
+	{
+		playSound(melody[i].tone, melody[i].length);
 	}
 }
 
@@ -223,7 +240,6 @@ void test_zerodiv(){
 	ex_zerodiv();
 }
 
-
 void increaseScale(){
 	sys_pixelPlus();
 }
@@ -231,7 +247,6 @@ void increaseScale(){
 void decreaseScale(){
 	sys_pixelMinus();
 }
-
 
 int print_mem(uint64_t mem){
 	return sys_printmem(mem);

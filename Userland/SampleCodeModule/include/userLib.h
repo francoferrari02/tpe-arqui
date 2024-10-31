@@ -5,10 +5,10 @@
 #include "colores.h"
 
 /* Prints a char in screen */
-void printc (char c);
+void printc (char c, Color fnt);
 
 /* Prints a string in screen */
-void prints (const char * str, int lenght);
+void prints (const char * str, int lenght, Color fnt);
 
 /* Gets a single char from keyboard */
 char getChar();
@@ -50,6 +50,16 @@ int print_mem(uint64_t mem);
 void increaseScale();
 
 void decreaseScale();
+
+typedef struct Note
+{
+    int tone;
+    int length;
+} NoteType;
+
+void playMusic(NoteType *melody, int length);
+void playSound(uint32_t freq, uint32_t length);
+
 
 
 #endif

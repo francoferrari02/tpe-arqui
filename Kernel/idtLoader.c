@@ -19,36 +19,36 @@ typedef struct {
 DESCR_INT * idt = (DESCR_INT *) 0;	// IDT de 255 entradas
 
 
+// Interrupciones de hardware
+extern void _irq00Handler(void); //timer tick
+extern void _irq01Handler(void); //teclado
 
 // excepciones
 extern void exception_divideByZero(void);
 extern void exception_invalidOpCode(void);
-// Interrupciones de hardware
-extern void interrupt_keyboard(void);
-extern void interrupt_timerTick(void);
+
 // syscalls
 extern void interrupt_syscall();
 
 
-
 static void setup_IDT_entry (int index, uint64_t offset);
 
+// Carga de la IDT
 void load_idt() {
   _cli();
 
   //Interrupciones de Hardware
-  setup_IDT_entry (0x21, (uint64_t)&interrupt_keyboard); //keyboard -> keyboard.c
-  setup_IDT_entry (0x20, (uint64_t)&interrupt_timerTick); //timer tick -> time.c
-
+  setup_IDT_entry (0x20, (uint64_t)&_irq00Handler); //timer tick 
+  setup_IDT_entry (0x21, (uint64_t)&_irq01Handler); //keyboard 
+  
   //Interrupciones de Software
-  setup_IDT_entry (0x80, (uint64_t)&interrupt_syscall); //syscalls -> syscall
+  setup_IDT_entry (0x80, (uint64_t)&interrupt_syscall); //syscalls 
 
   //Excepciones
   setup_IDT_entry (0x00, (uint64_t)&exception_divideByZero);
   setup_IDT_entry (0x06, (uint64_t)&exception_invalidOpCode);
 
 
-  //Solo interrupcion timer tick habilitadas
   picMasterMask(0xFC);
   picSlaveMask(0xFF);
         

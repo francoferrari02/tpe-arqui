@@ -10,7 +10,7 @@
  */
 uint64_t sys_read(uint64_t fd, char* buf);
 
-uint64_t sys_write(uint64_t fd, const char buf);
+uint64_t sys_write(uint64_t fd, const char buf, Color fnt);
 
 uint64_t sys_clear();
 
@@ -36,8 +36,8 @@ uint64_t sys_pixelPlus();
 
 uint64_t sys_pixelMinus();
 
-uint64_t sys_playSound(uint32_t frequence);
+uint64_t sys_playSound(uint32_t frequence, uint64_t length);
 
-uint64_t sys_mute();
+uint64_t sys_stopSound();
 
 #endif

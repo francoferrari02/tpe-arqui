@@ -3,9 +3,11 @@
 #include "include/videoDriver.h"
 
 static unsigned long ticks = 0;
+int ellapsed = 0; 
 
 void timer_handler() {
 	ticks++;
+	ellapsed += 55;
 }
 
 int ticks_elapsed() {
@@ -18,6 +20,14 @@ int seconds_elapsed() {
 
 int ms_elapsed() {
     return ticks*5000/91;
+}
+
+void wait(int millis){
+	ellapsed = 0;
+	while (ellapsed<millis)
+	{
+		_hlt();
+	}
 }
 
 void timer_wait(int delta) { 

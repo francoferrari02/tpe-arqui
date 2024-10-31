@@ -9,34 +9,66 @@
 #define MAX_BUFFER 254
 #define MAX_COMMANDS 10
 
-char line[MAX_BUFFER+1] = {0}; //asi me aseguro que al menos va haber un cero
+char line[MAX_BUFFER+1] = {0}; 
 char parameter[MAX_BUFFER+1] = {0};
 char command[MAX_BUFFER+1] = {0};
 int linePos = 0;
 char lastc;
-const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeplus","sizeminus"};
+int userDefined=0;
+char username[MAX_BUFFER+1];
+const char * commands[] = {"undefined","help","time","clear","snake","inforeg","zerodiv","invopcode","sizeinc","sizedec"};
 
-void showCommands(){
-	prints("\n-time-               muestra la hora actual en pantalla",MAX_BUFFER);
-	prints("\n-clear-              limpia la pantalla",MAX_BUFFER);
-	prints("\n-snake-              inicia el juego de snake",MAX_BUFFER);
-	prints("\n-inforeg-            imprime los valores de los registros",MAX_BUFFER);
-	prints("\n-zerodiv-            testeo de excepcion de division por cero",MAX_BUFFER);
-	prints("\n-invopcode-          testeo codigo de operacion invalido",MAX_BUFFER);
-	prints("\n-sizeplus-           aumenta el tamanio de letra",MAX_BUFFER);
-	prints("\n-sizeminus-          disminuye el tamanio de letra",MAX_BUFFER);
-	printc('\n');
+static const Color WHITE = {255,255,255};
+static const Color BLACK = {0,0,0};
+static const Color RED = {0,0,255};
+static const Color YELLOW = {120,255,255};
+static const Color LIGHT_BLUE = {255, 180,180};
+
+
+void setUsername(){
+	for (int i = 0; command[i] != '\0' && i < MAX_BUFFER; i++) {
+		username[i] = command[i];
+	}
+	username[MAX_BUFFER] = '\0';
 }
 
-// static Color BLACK = {0,0,0};
-// static Color WHITE = {255,255,255};
-// static Color RED = {0,0,255};
-// static Color LIGHT_BLUE = {255,255,255};
-// static Color BLUE = {255,0,0};
-// static Color ORANGE = {16,160,255};
-// static Color YELLOW = {30,224,255};
-// static Color PURPLE = {255,32,160};
-// static Color PINK = {100,0,244};
+
+
+void showCommands(){
+	prints("\n- time -",MAX_BUFFER, YELLOW);
+	prints("          Muestra hora actual", MAX_BUFFER, WHITE);  
+
+	prints("\n- clear -",MAX_BUFFER, YELLOW);       
+	prints("         Limpia la pantalla",MAX_BUFFER, WHITE);
+
+	prints("\n- inforeg -",MAX_BUFFER, YELLOW );
+	prints("       Muestra los valores de los registros",MAX_BUFFER, WHITE);
+
+	prints("\n- snake -",MAX_BUFFER, YELLOW );
+	prints("         Inicia el juego de snake",MAX_BUFFER, WHITE );
+
+	prints("\n- zerodiv -", MAX_BUFFER, YELLOW );
+	prints("       Testea la excepcion de division por cero",MAX_BUFFER, WHITE);
+
+	prints("\n- invopcode -",MAX_BUFFER, YELLOW );
+	prints("     Testea la excepcion de codigo de operacion invalido",MAX_BUFFER, WHITE );
+
+	prints("\n- sizedec -", MAX_BUFFER, YELLOW );
+	prints("       Disminuye el tamanio de letra",MAX_BUFFER, WHITE );   
+
+	prints("\n- sizeinc -", MAX_BUFFER, YELLOW );
+	prints("       Aumenta el tamanio de letra",MAX_BUFFER, WHITE );        
+	
+	prints("\n- help -",MAX_BUFFER, YELLOW );
+	prints("          Muestra los comandos disponibles",MAX_BUFFER, WHITE );
+
+
+	printc('\n', WHITE);
+}
+
+
+
+
 
 static void newLine();
 static void printLine(char c);
@@ -57,23 +89,15 @@ static void (*commands_ptr[MAX_COMMANDS])() = {cmd_undefined, cmd_help, cmd_time
 											   cmd_charsizeplus,cmd_charsizeminus};
 
 
-void shell (){
-	char c;
-	prints("$ User> ",9);
 
-	while(1){
-		c = getChar();
-		printLine(c);
-	};
-}
 
 static void printLine(char c){
 	if (linePos < MAX_BUFFER && c != lastc){
 		if (isChar(c) || c == ' ' ||isDigit(c)){
 			line[linePos++] = c;
-			printc(c);
+			printc(c, WHITE);
 		} else if (c == '\b' && linePos > 0){
-			printc(c);
+			printc(c, WHITE);
 			line[--linePos] = 0;
 		} else if (c == '\n'){
 			newLine();
@@ -87,6 +111,7 @@ static void newLine(){
 
 
 	int i = checkLine();
+	
 
 	(*commands_ptr[i])();
 
@@ -96,11 +121,14 @@ static void newLine(){
 		parameter[i] = 0;
 	}
 	linePos = 0;
-
-	if (i != 3 ){
-		prints("\n$ User> ",9);
+	if(i != 3 ){
+		prints("\n$ ",9, WHITE);
+		prints(username,MAX_BUFFER, WHITE);
+		prints("> ",MAX_BUFFER, WHITE);
 	} else {
-		prints("$ User> ",9);
+		prints("$ ",9, WHITE);
+		prints(username,MAX_BUFFER, WHITE);
+		prints("> ",MAX_BUFFER, WHITE);
 	}
 }
 
@@ -110,6 +138,8 @@ static int checkLine(){
 	int i = 0;
 	int j = 0;
 	int k = 0;
+	
+	
 	for ( j = 0 ; j < linePos && line[j] != ' ' ; j ++){
 		command[j] = line[j];
 	}
@@ -119,12 +149,15 @@ static int checkLine(){
 			parameter[k++] = line[j++];
 		}
 	}
-
-
+	
 
 	for (i = 1 ; i < MAX_COMMANDS ; i++ ){
-		if (strcmp(command,commands[i]) == 0){
-			return i;
+		if (!userDefined){
+			setUsername();
+			userDefined = 1;
+			return 1;
+		}else if (strcmp(command,commands[i]) == 0){
+				return i;
 		}
 	}
 
@@ -133,14 +166,14 @@ static int checkLine(){
 
 
 static void cmd_help(){
-	prints("\n---HELP---\n",MAX_BUFFER);
+	prints("\n\nComandos Disponibles:\n",MAX_BUFFER, LIGHT_BLUE);
 	showCommands();
 }
 
 static void cmd_undefined(){
-	prints("\n\nNo se reconoce \"",MAX_BUFFER);
-	prints(command,MAX_BUFFER);
-	prints("\" como un comando valido, para ver los comandos disponibles escribir \"help\"\n",MAX_BUFFER);
+	prints("\n\nError: ",MAX_BUFFER, RED);
+	prints(command,MAX_BUFFER, WHITE);
+	prints("\" No se reconoce un comando valido, para ver los comandos disponibles escribir. \"help\"\n",MAX_BUFFER, WHITE );
 }
 
 static void cmd_time(){
@@ -149,8 +182,9 @@ static void cmd_time(){
 
 
 static void cmd_snake(){
+	cmd_charsizeminus();
 	if(!startSnake(charToInt(parameter))){
-		prints("\ningrese un parametro valido '1' o '2' jugadores \n",MAX_BUFFER);
+		prints("\nNo se detecto parametro valido: '1' o '2' jugadores.\n Ejemplo: snake 1",MAX_BUFFER, WHITE ); 
 	}
 	
 }
@@ -181,5 +215,29 @@ static void cmd_charsizeminus(){
 
 
 
+void shell (){
+	prints("Bienvenido a la Shell hecha por Franco y Mateo!\n\n",MAX_BUFFER, LIGHT_BLUE);
 
+	NoteType windowsXPmelody[] = {
+		{622, 300}, // D#5
+		{0, 25},
+		{466, 300}, // A#4
+		{0, 50},
+		{415, 450}, // G#4
+		{0, 25},
+		{622, 250}, // D#5
+		{466, 900}	// A#4
+	};
+
+	playSound(466, 300);
+
+
+	prints("Ingrese su nombre de usuario: ",MAX_BUFFER, WHITE);
+	char c;
+
+	while(1){
+		c = getChar();
+		printLine(c);
+	};
+}
 

@@ -1,5 +1,11 @@
 #include <sys_calls.h>
 #include <userLib.h>
+#include <colores.h>
+static Color WHITE = {255,255,255};
+static Color BLACK = {0,0,0};
+static Color BLUE = {250,100,30};
+
+#define DIFF 3
 
 int getHours(){
 	return sys_getHours();
@@ -20,10 +26,10 @@ void display_time(){
 	minutes = getMinutes();
 	seconds = getSeconds();
 	
-	printc('\n');
-	printHex(hours);
-	printc(':');
-	printHex(minutes);
-	printc(':');
-	printHex(seconds);
+	printc('\n', WHITE);
+	printDec(hours - DIFF);
+	printc(':', BLUE);
+	printDec(minutes);
+	printc(':', BLUE);
+	printDec(seconds);
 }

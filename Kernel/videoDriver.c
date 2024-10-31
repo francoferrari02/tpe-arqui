@@ -1,6 +1,7 @@
 #include "videoDriver.h"
 #include "font.h"
 #include "time.h"
+#include "../Userland/SampleCodeModule/include/colores.h"
 
 
 struct vbe_mode_info_structure {
@@ -41,11 +42,14 @@ struct vbe_mode_info_structure {
     uint8_t reserved1[206];
 } __attribute__ ((packed));         // no alinea en memoria
 
-struct vbe_mode_info_structure* screenInfo = (void*)0x5C00;
+typedef struct vbe_mode_info_structure * VBEInfoPtr;
 
-Color RED = {30,30,255};
-Color WHITE = {255,255,255};
-Color BLACK = {0,0,0};
+VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
+
+static Color RED = {255,0,0};
+static Color WHITE = {255,255,255};
+static Color BLACK = {0,0,0};
+
 
 /* draws a char in screen in the given coordinates, then sets the coordinates where the next char should be drawn */
 static void drawChar (int x, int y, unsigned char c,Color fntColor, Color bgColor);
@@ -101,26 +105,26 @@ uint16_t cursorY = 0;
 static char buffer[64] = { '0' };
 
 
-void dv_prints(const char *str, Color fnt, Color bgd){
+void dv_prints(const char *str, Color fnt){
     for (int i = 0 ; str[i] != '\0'; i++ ){
-        dv_print(str[i], fnt, bgd);
+        dv_print(str[i], fnt);
     }
 }
 
 
-void dv_print(const char c, Color fnt, Color bgd){
+void dv_print(const char c, Color fnt){
     switch (c) {
         case '\n':
             dv_newline();
         break;
         case '\b':
-            dv_backspace(fnt, bgd);
+            dv_backspace(fnt, BLACK);
         break;
         case '\0':
             /* nada, no imprime nada */
         break;
         default:
-            drawChar(cursorX, cursorY , c , fnt , bgd);
+            drawChar(cursorX, cursorY , c , fnt , BLACK);
         break;
     }
 }
@@ -130,7 +134,7 @@ void dv_newline(){
     cursorX = 0;
     cursorY += CHAR_HEIGHT* pixelScale;
 
-    if (cursorY + CHAR_HEIGHT*pixelScale > screenInfo->height){
+    if (cursorY + CHAR_HEIGHT*pixelScale > VBE_mode_info->height){
         cursorY -= CHAR_HEIGHT*pixelScale;
         scrollUp();
     }
@@ -149,10 +153,10 @@ void dv_backspace(Color fnt, Color bgd){
 
 
 void dv_clear (Color color) {
-    Color* pixel = (Color*) ((uint64_t)screenInfo->framebuffer);
+    Color* pixel = (Color*) ((uint64_t)VBE_mode_info->framebuffer);
 
     //recorro todos los pixeles de la pantalla y los pongo del color que quiero
-    for (uint32_t len = (uint32_t)screenInfo->width * screenInfo->height; len; len--, pixel++){
+    for (uint32_t len = (uint32_t)VBE_mode_info->width * VBE_mode_info->height; len; len--, pixel++){
         *pixel = color;
     }
 
@@ -172,9 +176,9 @@ static void drawChar(int x, int y, unsigned char c, Color fntColor, Color bgColo
     const unsigned char *glyph = IBM_VGA_8x16_glyph_bitmap + 16 * (c - 32);
 
     // Chequeo que no sea el final de línea, ni el final de la pantalla
-    if (cursorX >= screenInfo->width) {
+    if (cursorX >= VBE_mode_info->width) {
         cursorX = 0;
-        if (cursorY + getRealCharHeight() > screenInfo->height) {
+        if (cursorY + getRealCharHeight() > VBE_mode_info->height) {
             cursorY -= getRealCharHeight();
             scrollUp();
         } else {
@@ -201,7 +205,7 @@ static void drawChar(int x, int y, unsigned char c, Color fntColor, Color bgColo
 static void scrollUp (){
     Color* pixel, *next;
     for (int i = 0 ; i < cursorY + CHAR_HEIGHT*pixelScale ; i++){
-        for (int j = 0 ; j < screenInfo->width ; j++){
+        for (int j = 0 ; j < VBE_mode_info->width ; j++){
             pixel = (Color *) getPixelPtr(j,i);
             next = (Color *) getPixelPtr(j,i+CHAR_HEIGHT*pixelScale);
             *pixel = *next;
@@ -225,7 +229,7 @@ void dv_printBin(uint64_t value, Color fnt, Color bgd){
 void dv_printBase(uint64_t value, uint32_t base, Color fnt, Color bgd){
     uintToBase(value, buffer, base);
     for (int i = 0 ; buffer[i] != '\0' ; i++ ){
-        dv_print(buffer[i], fnt, bgd);
+        dv_print(buffer[i], fnt);
     }
 }
 
@@ -263,10 +267,10 @@ static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base){
 
 //te paso una coordenada de la pantalla en (x,y) y te devuelvo la direccion de la pantalla que representa ese pixel
 static uint32_t* getPixelPtr(uint16_t x, uint16_t y) {
-    uint8_t pixelwidth = screenInfo->bpp/8;     //la cantidad de bytes hasta el siguiente pixel a la derecha (bpp: BITS per px)
-    uint16_t pixelHeight = screenInfo->pitch;   //la cantidad de bytes hasta el pixel hacia abajo
+    uint8_t pixelwidth = VBE_mode_info->bpp/8;     //la cantidad de bytes hasta el siguiente pixel a la derecha (bpp: BITS per px)
+    uint16_t pixelHeight = VBE_mode_info->pitch;   //la cantidad de bytes hasta el pixel hacia abajo
 
-    uintptr_t pixelPtr = (uintptr_t)(screenInfo->framebuffer) + (x * pixelwidth) + (y * pixelHeight);
+    uintptr_t pixelPtr = (uintptr_t)(VBE_mode_info->framebuffer) + (x * pixelwidth) + (y * pixelHeight);
     return (uint32_t*)pixelPtr;
 }
 
@@ -274,7 +278,7 @@ static uint32_t* getPixelPtr(uint16_t x, uint16_t y) {
 
 //pinto un pixel de la pantalla con el color que quiero, 
 void dv_setPixel(uint16_t x, uint16_t y, Color color) {
-    if (x >= screenInfo->width || y >= screenInfo->height)
+    if (x >= VBE_mode_info->width || y >= VBE_mode_info->height)
         return;
 
     Color* pixel = (Color*) getPixelPtr(x, y);
@@ -296,21 +300,21 @@ void dv_fillRect (int x, int y, int w, int h, Color color){
 
 
 uint16_t dv_getWidth(void) {
-    return screenInfo->width;
+    return VBE_mode_info->width;
 }
 
 uint16_t dv_getHeight(void) {
-    return screenInfo->height;
+    return VBE_mode_info->height;
 }
 
 uint32_t dv_getFrameBuffer(void) {
-    return screenInfo->framebuffer;
+    return VBE_mode_info->framebuffer;
 }
 
 uint8_t dv_getPixelWidth(void){
-    return screenInfo->bpp;
+    return VBE_mode_info->bpp;
 }
 
 uint16_t dv_getPitch(void){
-    return screenInfo->pitch;
+    return VBE_mode_info->pitch;
 }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 void interrupt_keyboard(void);
-void interrupt_timerTick(void);
+void _irq00Handler(void); //timer tick
 void interrupt_syscall(void);
 void exception_invalidOpCode(void);
 void exception_divideByZero(void);

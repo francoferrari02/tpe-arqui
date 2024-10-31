@@ -1,9 +1,10 @@
 GLOBAL cpuVendor
-GLOBAL getSeconds
-GLOBAL getHours
-GLOBAL getMinutes
-GLOBAL outSpeaker
-GLOBAL inSpeaker
+GLOBAL bd_to_binary
+GLOBAL secondsGetter
+GLOBAL hoursGetter
+GLOBAL minutesGetter
+GLOBAL speakerOut
+GLOBAL speakerIn
 section .text
 	
 
@@ -31,10 +32,38 @@ cpuVendor:
 	pop rbp
 	ret
 
-	
-getSeconds:
+	bd_to_binary:
 	push rbp
 	mov rbp, rsp
+
+	mov al, 0Bh 
+	out 70h, al  
+	in al, 71h
+	
+	mov bl, 4h
+	or al, bl
+	
+	mov bl, al
+	mov al, 0Bh
+	
+	out 70h, al
+	
+	mov al, bl
+	
+	out 71h, al
+
+	mov rsp, rbp
+	pop rbp
+	ret
+
+
+	
+secondsGetter:
+	push rbp
+	mov rbp, rsp
+
+	call bd_to_binary
+
 
     mov al, 0x00
     out 70h, al
@@ -44,9 +73,11 @@ getSeconds:
 	pop rbp
     ret
 
-getMinutes:
+minutesGetter:
 	push rbp
 	mov rbp, rsp
+
+	call bd_to_binary
 
     mov al, 0x02
     out 70h, al
@@ -56,9 +87,11 @@ getMinutes:
 	pop rbp
     ret
 
-getHours:
+hoursGetter:
 	push rbp
 	mov rbp, rsp
+
+	call bd_to_binary
 
     mov al, 0x04
     out 70h, al
@@ -69,7 +102,7 @@ getHours:
     ret		
 
 
-inSpeaker:
+speakerIn:
 	push rbp
 	mov rbp, rsp
 
@@ -80,7 +113,7 @@ inSpeaker:
 	pop rbp
 	ret
 
-outSpeaker:
+speakerOut:
 	push rbp
 	mov rbp, rsp 
 

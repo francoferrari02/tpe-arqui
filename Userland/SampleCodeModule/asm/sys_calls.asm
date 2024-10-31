@@ -16,17 +16,7 @@ GLOBAL sys_playSound
 GLOBAL sys_mute
 section .text
 
-; Pasaje de parametros en C:
-; %rdi %rsi %rdx %rcx %r8 %r9
 
-; Pasaje de parametros para sys_calls
-; %rdi %rsi %rdx %r10 %r8 %r9
-
-; MOVER RCX a R10
-
-; %rcx y %rc11 son destruidos si las llamo desde aca
-
-; %rax el numero de la syscall
 
 sys_read:
     mov rax, 0x00
@@ -104,7 +94,9 @@ sys_playSound:
     int 80h
     ret
 
-sys_mute: 
+sys_stopSound: 
     mov rax, 0x0F
     int 80h
     ret
+
+
