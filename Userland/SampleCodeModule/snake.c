@@ -3,6 +3,7 @@
 #include <colores.h>
 #include "sys_calls.h"
 
+
 static unsigned long int next = 1;
 
 int rand() {
@@ -125,8 +126,7 @@ void printScore2(){
 
 //chequeo de colisiones y actualizacion de la serpiente
 void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2, char s3, char s4){
-    
-    if (player->directionToGo == s1) {
+   if (player->directionToGo == s1) {
         player->actualY--;
     } else if (player->directionToGo == s2) {
         player->actualY++;
@@ -136,7 +136,6 @@ void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2,
         player->actualX++;
     }
 
-
     // Verificar si la serpiente se come a sí misma
     for (int i = 0; i < player->length; i++) {
         if (player->actualX == player->vecPos[i].j && player->actualY == player->vecPos[i].i) {
@@ -144,13 +143,12 @@ void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2,
             break;
         }
     }
-    
 
-    //verifica si la serpiente choco con el borde de la pantalla
-    if (player->actualX < 0 || player->actualX >= WIDTH  || player->actualY < 4 || player->actualY >=HEIGHT ) {
+    // Verifica si la serpiente chocó con el borde de la pantalla
+    if (player->actualX < 0 || player->actualX >= WIDTH || player->actualY < 4 || player->actualY >= HEIGHT) {
         player->alive = 0;
+        
     }
-    
 
     if (!player->alive) {
         gameover = 1;
@@ -161,16 +159,15 @@ void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2,
         player->length++;
         player->score++;
         printScore1();
+        
         generateFood(game, &foodX, &foodY);
-        
-        
-    }else{
+    } else {
         if ((player->actualX == foodX && player->actualY == foodY) && player->playerNumber == 2) {
             player->length++;
             player->score++;
             printScore2();
-            generateFood(game, &foodX, &foodY);
             
+            generateFood(game, &foodX, &foodY);
         }
     }
 

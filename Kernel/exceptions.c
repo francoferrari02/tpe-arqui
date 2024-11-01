@@ -52,7 +52,7 @@ void exception_handler(int exception, const uint64_t register_data[17]) {
         else
             dv_prints("   ",white);
     }
-    //reset();
+    reset();
 
     
 }

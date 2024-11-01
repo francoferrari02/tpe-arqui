@@ -211,6 +211,7 @@ exception_divideByZero:
 	mov rsi, exception_register_dump
 	call exception_handler
 
+	iret
 
 
 exception_invalidOpCode:
