@@ -72,17 +72,44 @@ struct Player {
 };
 
 NoteType snakeSong[] = {
-		{622, 300}, // D#5
-		{0, 25},
-		{466, 300}, // A#4
-		{0, 50},
-		{415, 450}, // G#4
-		{0, 25},
-		{622, 250}, // D#5
-		{466, 900}	// A#4
+                // Inicio - tono ascendente para captar atención
+        {440, 150},   // A4
+        {0, 30},
+        {494, 150},   // B4
+        {0, 30},
+        {523, 150},   // C5
+        {0, 30},
+        {587, 150},   // D5
+
+        // Pausa breve antes de la secuencia de movimiento
+        {0, 50},
+
+        // Melodía rápida, como un guiño al movimiento del Snake
+        {392, 100},   // G4
+        {0, 20},
+        {440, 100},   // A4
+        {0, 20},
+        {349, 100},   // F4
+        {0, 20},
+        {392, 100},   // G4
+
+        // Tono final corto para indicar el inicio
+        {523, 300}    // C5
 	};
 
+NoteType snakeEatsSound[]={
+    {660, 200},
+    {0,50},
+    {523, 200}
+};
 
+NoteType snakeDiesSound[]={
+    {392, 200},
+    {0, 58},
+    {330, 200},
+    {0, 50},
+    {262, 300}
+};
 
 
 
@@ -171,6 +198,7 @@ void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2,
     if ((player->actualX == foodX && player->actualY == foodY) && player->playerNumber == 1) {
         player->length++;
         player->score++;
+        playMusic(snakeEatsSound, (sizeof(snakeEatsSound) / sizeof(NoteType)) );
         printScore1();
         
         generateFood(game, &foodX, &foodY);
@@ -178,6 +206,7 @@ void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2,
         if ((player->actualX == foodX && player->actualY == foodY) && player->playerNumber == 2) {
             player->length++;
             player->score++;
+            playMusic(snakeEatsSound, (sizeof(snakeEatsSound) / sizeof(NoteType)) );
             printScore2();
             
             generateFood(game, &foodX, &foodY);
@@ -281,6 +310,7 @@ void snakeGame() {
         wait(100);
 
     }
+    playMusic(snakeDiesSound, (sizeof(snakeDiesSound) / sizeof(NoteType)) );
     clear_scr();
     prints("\nGame Over, puntaje obtenido: ", MAX_BUFFER, WHITE);
     printDec(player.score);
@@ -364,6 +394,7 @@ void snakeGame2Players() {
 
     }
     fill_rect(0, 0, get_scrWidht() / 2, get_scrHeight() / 8, BLACK);
+    playMusic(snakeDiesSound, (sizeof(snakeDiesSound) / sizeof(NoteType)) );
     clear_scr();
     prints("\nGame Over, puntaje obtenido: ", MAX_BUFFER, WHITE);
     prints("\nJugador 1: ", MAX_BUFFER, WHITE);

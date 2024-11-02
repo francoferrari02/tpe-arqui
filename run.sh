@@ -8,6 +8,10 @@
 #!/bin/bash
 # Set audio device variable !!
 
-sudo qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 -device ac97 -audiodev coreaudio,id=snd0
-
+if [ "$(uname)" == "Darwin" ]; then
+    audio="coreaudio"
+else
+    audio="pa"
+fi
+sudo qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 -soundhw pcspk
 

@@ -227,18 +227,25 @@ void shell (){
 void start(){
 	prints("Bienvenido a la Shell hecha por Franco y Mateo!\n\n",MAX_BUFFER, LIGHT_BLUE);
 
-	NoteType windowsXPmelody[] = {
-		{622, 300}, // D#5
-		{0, 25},
-		{466, 300}, // A#4
+	NoteType SOmelody[] = {
+		// Inicio - tono agudo de bienvenida
+		{784, 200},   // G5
 		{0, 50},
-		{415, 450}, // G#4
-		{0, 25},
-		{622, 250}, // D#5
-		{466, 900}	// A#4
+		{659, 200},   // E5
+		{0, 50},
+		{523, 200},   // C5
+		{0, 50},
+		{659, 150},   // E5
+		{784, 400},   // G5
+
+		// Pausa breve antes de terminar con un tono final
+		{0, 100},
+
+		// Tono final más bajo para dar cierre
+		{392, 500}    // G4
 	};
 
-	playMusic(windowsXPmelody, 8);
+	playMusic(SOmelody, (sizeof(SOmelody) / sizeof(NoteType)));
 
 
 	prints("Ingrese su nombre de usuario: ",MAX_BUFFER, WHITE);
