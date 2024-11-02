@@ -45,10 +45,7 @@ static Color GREEN = {60, 145, 55};
 #define PLAYER2_LEFT 'j'
 #define PLAYER2_RIGHT 'l'
 
-int score1Y = 2;
-int score1X = 3;
-int score2y = 3;
-int score2X = 3;
+
 
 int gameover;
 int foodX, foodY;
@@ -69,6 +66,8 @@ struct Player {
     Color playerColor;
     int length;
     struct Position vecPos[MAXDIM];
+    int scoreX;
+    int scoreY;
 };
 
 NoteType snakeSong[] = {
@@ -154,15 +153,15 @@ void input(struct Player *player,char s1, char s2, char s3, char s4) {
     }
 }
 
+
+
+
 //impresion del puntaje de cada snake
-void printScore1(){
-    fill_rect(score1X* PIXELWIDTH,  score1Y* PIXELHEIGHT, PIXELWIDTH-20, PIXELHEIGHT-12, YELLOW);
-    score1X++;
+void printScore(struct Player *player){
+    fill_rect(player->scoreX* PIXELWIDTH,  player->scoreY* PIXELHEIGHT, PIXELWIDTH-20, PIXELHEIGHT-12, YELLOW);
+    player->scoreX++;
 }
-void printScore2(){
-    fill_rect(score2X* PIXELWIDTH,  score2y* PIXELHEIGHT, PIXELWIDTH-20, PIXELHEIGHT-12, YELLOW);
-    score2X++;
-}
+
 
 //chequeo de colisiones y actualizacion de la serpiente
 void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2, char s3, char s4){
@@ -195,22 +194,13 @@ void inLogic(char game[HEIGHT][WIDTH], struct Player * player, char s1, char s2,
         player->playerColor = RED;
     }
 
-    if ((player->actualX == foodX && player->actualY == foodY) && player->playerNumber == 1) {
+    if ((player->actualX == foodX && player->actualY == foodY)) {
         player->length++;
         player->score++;
         playMusic(snakeEatsSound, (sizeof(snakeEatsSound) / sizeof(NoteType)) );
-        printScore1();
+        printScore(player);
         
         generateFood(game, &foodX, &foodY);
-    } else {
-        if ((player->actualX == foodX && player->actualY == foodY) && player->playerNumber == 2) {
-            player->length++;
-            player->score++;
-            playMusic(snakeEatsSound, (sizeof(snakeEatsSound) / sizeof(NoteType)) );
-            printScore2();
-            
-            generateFood(game, &foodX, &foodY);
-        }
     }
 
     if (player->alive) {
@@ -235,6 +225,9 @@ void setPlayer1(struct Player *player1) {
     player1->symbol = '#';
     player1->playerColor = LIGHT_BLUE;
     player1->length = 2;
+    player1->score = 0;
+    player1->scoreX = 3;
+    player1->scoreY = 2;
 }
 
 //inicializa snake2
@@ -247,6 +240,9 @@ void setPlayer2(struct Player *player2) {
     player2->symbol = '@';
     player2->playerColor = ORANGE;
     player2->length = 2;
+    player2->score = 0;
+    player2->scoreX = 3;
+    player2->scoreY = 3;
 }
 
 
@@ -418,7 +414,7 @@ int startSnake(int option) {
     clear_scr();
 
     playMusic(snakeSong, (sizeof(snakeSong) / sizeof(NoteType)));
-
+    
     if (option == 1) {
         prints("\nModo 1 jugador\n", MAX_BUFFER, WHITE);
         snakeGame();
