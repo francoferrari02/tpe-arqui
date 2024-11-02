@@ -216,6 +216,15 @@ static void cmd_charsizeminus(){
 
 
 void shell (){
+	
+	while(1){
+		char c;
+		c = getChar();
+		printLine(c);
+	};
+}
+
+void start(){
 	prints("Bienvenido a la Shell hecha por Franco y Mateo!\n\n",MAX_BUFFER, LIGHT_BLUE);
 
 	NoteType windowsXPmelody[] = {
@@ -229,15 +238,9 @@ void shell (){
 		{466, 900}	// A#4
 	};
 
-	playSound(466, 300);
+	playMusic(windowsXPmelody, 8);
 
 
 	prints("Ingrese su nombre de usuario: ",MAX_BUFFER, WHITE);
-	char c;
 
-	while(1){
-		c = getChar();
-		printLine(c);
-	};
 }
-

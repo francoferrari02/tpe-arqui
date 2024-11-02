@@ -71,6 +71,19 @@ struct Player {
     struct Position vecPos[MAXDIM];
 };
 
+NoteType snakeSong[] = {
+		{622, 300}, // D#5
+		{0, 25},
+		{466, 300}, // A#4
+		{0, 50},
+		{415, 450}, // G#4
+		{0, 25},
+		{622, 250}, // D#5
+		{466, 900}	// A#4
+	};
+
+
+
 
 
 void generateFood(char game[HEIGHT][WIDTH], int *foodX, int *foodY) {
@@ -372,6 +385,8 @@ void snakeGame2Players() {
 //inicia el juego
 int startSnake(int option) {
     clear_scr();
+
+    playMusic(snakeSong, (sizeof(snakeSong) / sizeof(NoteType)));
 
     if (option == 1) {
         prints("\nModo 1 jugador\n", MAX_BUFFER, WHITE);

@@ -11,7 +11,7 @@ static const Color BLACK = {0,0,0};
 static const Color LIGHT_BLUE = {255, 180,180};
 
 int main() {
-
+	start();
 	shell();
 
 

@@ -6,6 +6,8 @@
 
 #define MAX_BUFFER 254
 
+void start();
+
 void shell();
 
 void showCommands();
