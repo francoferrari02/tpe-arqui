@@ -13,7 +13,6 @@ extern uint8_t has_register_info;
 extern const uint64_t register_info[17];
 extern int _hlt();
 
-static Color RED = {255,0,0};
 static Color WHITE = {255,255,255};
 static Color BLACK = {0,0,0};
 

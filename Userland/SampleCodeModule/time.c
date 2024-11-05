@@ -2,7 +2,6 @@
 #include <userLib.h>
 #include <colores.h>
 static Color WHITE = {255,255,255};
-static Color BLACK = {0,0,0};
 static Color BLUE = {250,100,30};
 
 #define DIFF 3

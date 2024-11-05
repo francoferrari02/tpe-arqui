@@ -13,9 +13,9 @@ static char buffer[64] = { '0' };
 int scr_height;
 int scr_width;
 
-static Color RED = {255,0,0};
+
 static Color WHITE = {255,255,255};
-static Color BLACK = {0,0,0};
+
 
 
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
@@ -123,17 +123,16 @@ static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base){
     char *p1, *p2;
     uint32_t digits = 0;
 
-    //Calculate characters for each digit
+    
     do{
         uint32_t remainder = value % base;
         *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
         digits++;
     }while (value /= base);
 
-    // Terminate string in buffer.
     *p = 0;
 
-    //Reverse string in buffer.
+    
     p1 = buffer;
     p2 = p - 1;
     while (p1 < p2){
@@ -151,18 +150,22 @@ void clear_scr(){
 	sys_clear();
 }
 
+
 int get_scrWidht(){
 	return scr_width;
 }
+
 
 int get_scrHeight(){
 	return scr_height;
 }
 
+
 static void set_screSize(){
 	scr_width = sys_scrWidth();
 	scr_height = sys_scrHeight();
 }
+
 
 void fill_rect(int x, int y, int x2, int y2, Color color){
 	set_screSize();
@@ -190,6 +193,7 @@ static void uint64ToHex(uint64_t n, char buf[16]) {
     } while(i-- != 0);
 }
 
+
 void inforeg(){
 	char hexbuf[19];
     hexbuf[0] = '0';
@@ -214,13 +218,14 @@ void inforeg(){
 
 
     } else {
-		prints("\nTodavia no hay un snapshot de los registros, presione SHIFT + S para sacar una foto.\n",100, WHITE);
+		prints("\nTodavia no hay un snapshot de los registros, presione SHIFT + S para capturar.\n",100, WHITE);
 	}
 }
 
 void playSound(uint32_t freq, uint32_t length){
 	sys_playSound(freq, length);
 }
+
 
 void playMusic(NoteType *melody, int length)
 {
@@ -229,7 +234,6 @@ void playMusic(NoteType *melody, int length)
 		playSound(melody[i].tone, melody[i].length);
 	}
 }
-
 
 
 void test_invopcode(){

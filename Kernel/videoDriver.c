@@ -46,8 +46,6 @@ typedef struct vbe_mode_info_structure * VBEInfoPtr;
 
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
-static Color RED = {255,0,0};
-static Color WHITE = {255,255,255};
 static Color BLACK = {0,0,0};
 
 
