@@ -2,6 +2,9 @@
 #include "include/naiveConsole.h"
 #include "include/videoDriver.h"
 
+extern void _hlt();
+
+
 static unsigned long ticks = 0;
 int ellapsed = 0; 
 

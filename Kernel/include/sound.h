@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+void speakerOut(int port, int value);
+
+void wait(int duration);
+
+int speakerIn(int port);
+
 void startSpeaker(uint32_t freq);
 
 void stopSpeaker();
