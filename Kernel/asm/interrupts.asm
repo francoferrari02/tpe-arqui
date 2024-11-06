@@ -23,7 +23,7 @@ EXTERN timer_handler
 EXTERN keyboard_handler
 EXTERN syscall_handler
 EXTERN exception_handler
-EXTERN dv_newline
+EXTERN VDNewline
 
 SECTION .text
 
@@ -69,7 +69,7 @@ SECTION .text
 %endmacro
 
 
-%macro saveRegistersException 0 ; Guarda los registros en exception_register_dump
+%macro saveRegistersException 0 
 	mov [exception_register_dump+0], rax ;0
 	mov [exception_register_dump+8], rbx ;1
 	mov [exception_register_dump+16], rcx ;2
@@ -122,7 +122,7 @@ picMasterMask:
 picSlaveMask:
 	push    rbp
     mov     rbp, rsp
-    mov     ax, di  ; ax = mascara de 16 bits
+    mov     ax, di  
     out	0A1h,al
     pop     rbp
     retn
@@ -131,7 +131,7 @@ picSlaveMask:
 
 
 ;Interrupciones
-_irq00Handler: ; Timer tick
+_irq00Handler: 
 	pushState
 
 	call timer_handler
@@ -142,14 +142,14 @@ _irq00Handler: ; Timer tick
 
 
 
-_irq01Handler: ; Keyboard
+_irq01Handler: 
 	pushState
 	
 	xor rax, rax
-	in al, 60h 		; 60 es el puerto del teclado AL : 8 bits
-	mov rdi, rax 	; recepcion del primer parametro
+	in al, 60h 		
+	mov rdi, rax 	
 
-	cmp al, 0x2A 	;left shift pressed
+	cmp al, 0x2A 	
 	jne .continue1
 	mov byte [left_shift], 1
 
@@ -158,10 +158,9 @@ _irq01Handler: ; Keyboard
 	jne .continue2
 	mov byte [left_shift], 0
 
-	;si estan apretados SHIFT+S se copian los registros en el vector regdataDump
-	;mover RSP a donde estaba antes de ser llamada la excepcion
+	
 .continue2: 
-	cmp byte [left_shift], 1 	; 's' pressed
+	cmp byte [left_shift], 1 
 	jne .continue3
 	cmp al, 0x1F
 	jne .continue3
@@ -182,14 +181,14 @@ _irq01Handler: ; Keyboard
 	mov [register_info+16*8], r15
 
 	mov rax, rsp
-	add rax, 160 ;120 del popstate 
-	mov [register_info+8*8], rax ;RSP
+	add rax, 160  
+	mov [register_info+8*8], rax 
 
 	mov rax, [rsp+15*8]
-	mov [register_info], rax ;RIP
+	mov [register_info], rax 
 	
 	mov rax, [rsp+14*8]
-	mov [register_info+1*8], rax ;RAX
+	mov [register_info+1*8], rax 
 
 	mov byte [has_register_info], 1
 
@@ -225,8 +224,7 @@ exception_invalidOpCode:
 
 ;Syscall
 
-; syscalls params:	RDI	RSI	RDX	R10	R8	R9
-; C 	params   :	RDI RSI RDX RCX R8  R9
+
 interrupt_syscall:
 	mov rcx, r10
 	mov r9, rax
@@ -245,7 +243,7 @@ haltcpu:
 
 SECTION .bss
 	aux resq 1
-	exception_register_dump resq 18	; reserva 18 bytes para guardar los registros para excepciones
-	register_info	resq 17	; reserve space for 17 qwords (one for each register we want to show on inforeg).
-	has_register_info resb 1 	; reserve 1 byte for a boolean on whether a regdump has already occurred.
-	left_shift resb 1   ; shift presionado
+	exception_register_dump resq 18
+	register_info	resq 17	
+	has_register_info resb 1 	
+	left_shift resb 1   
